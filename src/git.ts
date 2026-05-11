@@ -2,10 +2,13 @@ import { execSync } from 'child_process';
 import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
+import * as vscode from 'vscode';
 
-const PROJECTS_SEARCH_DIRS = [
-  join(homedir(), 'Documents', '_projects'),
-];
+function getSearchDirs(): string[] {
+  const cfg = vscode.workspace.getConfiguration('timetracker');
+  const dirs = cfg.get<string[]>('projectsSearchDirs') ?? ['~/Documents'];
+  return dirs.map(d => d.replace(/^~/, homedir()));
+}
 
 export function resolveRepoPath(projectName: string): string | null {
   try {
@@ -15,7 +18,7 @@ export function resolveRepoPath(projectName: string): string | null {
     if (map[projectName]) return map[projectName];
   } catch {}
 
-  for (const dir of PROJECTS_SEARCH_DIRS) {
+  for (const dir of getSearchDirs()) {
     const candidate = join(dir, projectName);
     if (existsSync(join(candidate, '.git'))) return candidate;
   }
