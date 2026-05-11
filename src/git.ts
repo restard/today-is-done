@@ -28,7 +28,7 @@ export function resolveRepoPath(projectName: string): string | null {
 export function getCommits(repoPath: string, date: string): string[] {
   try {
     const out = execSync(
-      `git -C "${repoPath}" log --format="%s" --since="${date} 00:00:00" --until="${date} 23:59:59"`,
+      `git -C "${repoPath}" log --all --no-merges --format="%s" --since="${date} 00:00:00" --until="${date} 23:59:59"`,
       { timeout: 3000, encoding: 'utf-8' }
     );
     return out.trim().split('\n').filter(Boolean);
