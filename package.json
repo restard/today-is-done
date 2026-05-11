@@ -50,14 +50,30 @@
           "default": 2,
           "description": "Idle timeout in minutes"
         },
-        "timetracker.outputFormat": {
-          "type": "string",
-          "default": "markdown",
-          "enum": [
-            "markdown",
-            "plain"
+        "timetracker.projectsSearchDirs": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": ["~/Documents"],
+          "description": "Directories to search for project repositories (~ is expanded to home directory)"
+        },
+        "timetracker.copyTemplate": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [
+            "{separator}",
+            "{date}",
+            "Good work today! 🎉",
+            "{separator}",
+            "{projects}",
+            "{separator}",
+            "Time by project",
+            "{separator}",
+            "{timeBreakdown}",
+            "{separator}",
+            "Total                {total}",
+            "{separator}"
           ],
-          "description": "Output format (markdown / plain)"
+          "description": "Template for the copied summary. Available variables: {date}, {separator}, {projects}, {timeBreakdown}, {total}"
         }
       }
     }
