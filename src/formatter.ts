@@ -2,7 +2,22 @@ import * as vscode from 'vscode';
 import { DayRecord, TimeData } from './storage';
 import { getCommits, resolveRepoPath } from './git';
 
-const LINE = '──────────────────────────────';
+const SEPARATOR = '──────────────────────────────';
+
+const DEFAULT_TEMPLATE = [
+  '{separator}',
+  '{date}',
+  'Good work today! 🎉',
+  '{separator}',
+  '{projects}',
+  '{separator}',
+  'Time by project',
+  '{separator}',
+  '{timeBreakdown}',
+  '{separator}',
+  'Total                {total}',
+  '{separator}',
+];
 
 function hm(seconds: number): string {
   const h = Math.floor(seconds / 3600);
@@ -22,40 +37,47 @@ export function formatDay(date: string, dayData: DayRecord | undefined): string 
     return `No activity recorded for ${formatDate(date)}.`;
   }
 
-  const entries = Object.entries(dayData).sort(([, a], [, b]) => b - a);
-  const lines: string[] = [];
+  const cfg = vscode.workspace.getConfiguration('timetracker');
+  const template = cfg.get<string[]>('copyTemplate') ?? DEFAULT_TEMPLATE;
 
-  // summary section
-  lines.push(LINE);
-  lines.push(formatDate(date));
-  lines.push('Good work today! 🎉');
-  lines.push(LINE);
+  const entries = Object.entries(dayData)
+    .filter(([, s]) => s > 0)
+    .sort(([, a], [, b]) => b - a);
+  const total = entries.reduce((sum, [, s]) => sum + s, 0);
 
-  for (const [project, seconds] of entries) {
-    if (seconds === 0) continue;
-    lines.push('');
-    lines.push(project);
+  const projectsBlock: string[] = [];
+  for (const [project] of entries) {
+    if (projectsBlock.length > 0) projectsBlock.push('');
+    projectsBlock.push(project);
     const repoPath = resolveRepoPath(project);
     if (repoPath) {
       const commits = getCommits(repoPath, date);
-      for (const c of commits) {
-        lines.push(`- ${c}`);
-      }
+      for (const c of commits) projectsBlock.push(`- ${c}`);
     }
   }
 
-  // time breakdown section
-  const total = entries.reduce((sum, [, s]) => sum + s, 0);
-  lines.push('');
-  lines.push(LINE);
-  lines.push('Time by project');
-  lines.push(LINE);
-  for (const [project, seconds] of entries) {
-    lines.push(`- ${project.padEnd(20)} ${hm(seconds)}`);
+  const timeBreakdownBlock = entries.map(
+    ([project, seconds]) => `- ${project.padEnd(20)} ${hm(seconds)}`
+  );
+
+  const formattedDate = formatDate(date);
+  const totalHm = hm(total);
+
+  const lines: string[] = [];
+  for (const tpl of template) {
+    if (tpl === '{projects}') {
+      lines.push(...projectsBlock);
+    } else if (tpl === '{timeBreakdown}') {
+      lines.push(...timeBreakdownBlock);
+    } else {
+      lines.push(
+        tpl
+          .replace('{date}', formattedDate)
+          .replace('{separator}', SEPARATOR)
+          .replace('{total}', totalHm)
+      );
+    }
   }
-  lines.push(LINE);
-  lines.push(`${'Total'.padEnd(20)} ${hm(total)}`);
-  lines.push(LINE);
 
   return lines.join('\n');
 }
