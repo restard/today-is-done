@@ -73,10 +73,11 @@ The timer resets on any of the following actions (stops after `timeoutMinutes` o
 
 ## Settings
 
-| Setting                      | Description             | Default    |
-| ---------------------------- | ----------------------- | ---------- |
-| `timetracker.timeoutMinutes` | Idle timeout in minutes | `2`        |
-| `timetracker.outputFormat`   | Output format           | `markdown` |
+| Setting                          | Description                                                                                                              | Default          |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ---------------- |
+| `timetracker.timeoutMinutes`     | Idle timeout in minutes                                                                                                  | `2`              |
+| `timetracker.projectsSearchDirs` | Directories to search for project repositories (`~` is expanded to home directory)                                      | `["~/Documents"]` |
+| `timetracker.copyTemplate`       | Template lines for the copied summary. Available variables: `{date}` `{separator}` `{projects}` `{timeBreakdown}` `{total}` | (see default)    |
 
 ---
 
