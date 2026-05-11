@@ -3,7 +3,7 @@
   "displayName": "Today's Done",
   "publisher": "restard",
   "description": "Automatically track work time per project",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "engines": {
     "vscode": "^1.80.0"
   },
